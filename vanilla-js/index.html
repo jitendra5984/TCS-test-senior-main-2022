@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>TCS-test-senior-main</title>
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12 col-lg-9 col-xl-9 col-xxl-9">
+                <div class="container bg-light" style="height: 100px;">
+                    <p class="text-break fs-1 fw-bold text-center d-inline-block" style="color: var(--bs-gray-300);">Advertising Space</p>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6 col-xxl-6 p-2 pe-0">
+                        <div id="collectionContainerOne"></div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6 col-xxl-6 p-2">
+                        <div id="collectionContainerTwo"></div>
+                        <div id="collectionContainerOthers"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-lg-3 col-xl-3 col-xxl-3 m-0 p-0">
+                <div class="container placeholder bg-light" style="height: 500px;">
+                    <p class="text-break fs-1 fw-bold text-center d-inline-block" style="color: var(--bs-gray-300);">Advertising Space</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        const collectionAPIurl = "http://localhost:3000/collection";
+        const maximumNews = 5;
+
+        function getHTMLCollectionOne(data){
+            const HTML = '<div class="card border-0 border-bottom"><img class="card-img-top w-100 d-block" src="'+data["Imageurl"]+'">'+
+                            '<div class="card-body">'+
+                                '<h4 class="card-title"><i class="fas fa-plus text-info"></i> ' + data["Title"] + '</h4><p><span class="highlight_tag1">' + data["Tag"] + '</span> '+ data["Intro"] +'</p><a class="card-link card_links" href="#"><i class="far fa-clock"></i> '+ data["Published"] +'</a><a class="card-link card_links" href="#"><i class="far fa-comment-alt"></i> ' + data["Comment"]+ '</a>'+
+                            '</div>'+
+                        '</div>';
+            return HTML;
+        }
+
+        function getHTMLCollectionTwo(data){
+            const HTML = '<div class="card border-0 border-bottom"><img class="card-img-top w-100 d-block" src="'+data["Imageurl"]+'">'+
+                            '<div class="card-body">'+
+                                '<h5 class="card-title"><i class="fas fa-plus text-info"></i> ' + data["Title"] + '</h5><p><span class="highlight_tag2">' + data["Tag"] + '</span> '+ data["Intro"] +'</p><a class="card-link card_links" href="#"><i class="far fa-clock"></i> '+ data["Published"] +'</a><a class="card-link card_links" href="#"><i class="far fa-comment-alt"></i> ' + data["Comment"]+ '</a>'+
+                            '</div>'+
+                        '</div>';
+            return HTML;
+        }
+
+        function getHTMLCollectionOthers(data){
+            const HTML = '<div class="card border-0 border-bottom">'+
+                            '<div class="row g-0">'+
+                                '<div class="col-7">'+
+                                    '<div class="card-body pe-0">'+
+                                        '<h6 class="card-title"><i class="fas fa-plus text-info"></i> ' + data["Title"] +
+                                    '</h6></div>'+
+                                    '<div class="align-bottom ps-3"><a class="card_links card-link" href="#"><i class="far fa-clock"></i> '+ data["Published"] +'</a><a class="card_links card-link" href="#"><i class="far fa-comment-alt"></i> ' + data["Comment"]+ '</a></div>'+
+                                '</div>'+
+                                '<div class="col-5 py-2 text-end"><img src="'+data["Imageurl"]+'"></div>'+
+                            '</div>'+
+                        '</div>';
+            return HTML;
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            fetch(collectionAPIurl).then(function (response) {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    return Promise.reject(response);
+                }
+            }).then(function (data) {
+                //console.log(data);
+
+                if(data.length > 0){
+                    data.forEach(collection => {
+                        if(collection["collectiontype"] == "landing"){
+                            let collectionId = collection["collectionid"];
+                            const collectionNewsURL = collectionAPIurl + '/' + collectionId;
+
+                            fetch(collectionNewsURL).then(function (response) {
+                                if (response.ok) {
+                                    return response.json();
+                                } else {
+                                    return Promise.reject(response);
+                                }
+                            }).then(function (data) {
+                                //console.log(data);
+
+                                for (let i = 0; i < data.length; i++) {
+                                    if(i >= maximumNews) break;
+                                    
+                                    if(data[i] && i == 0){
+                                        document.querySelector("#collectionContainerOne").innerHTML = getHTMLCollectionOne(data[i]);
+                                    }
+                                    else if(data[i] && i == 1){
+                                        document.querySelector("#collectionContainerTwo").innerHTML = getHTMLCollectionTwo(data[i]);
+                                    }
+                                    else if(data[i] && i > 1 && i < maximumNews){
+                                        document.querySelector("#collectionContainerOthers").innerHTML += getHTMLCollectionOthers(data[i]);
+                                    }
+                                }
+                            }).catch(function (err) {
+                                console.warn('Something went wrong.', err);
+                            });
+                        }
+                    });
+                }
+            }).catch(function (err) {
+                console.warn('Something went wrong.', err);
+            });
+
+          }, false);
+    </script>
+</body>
+
+</html>
